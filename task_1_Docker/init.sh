@@ -1,10 +1,7 @@
 #!/bin/bash
 set -e
 
-# Скачиваем CSV файл с данными
-wget -O aggrigation_logs_per_week.csv https://raw.githubusercontent.com/monitor81/big_data_course/main/datasets/aggrigation_logs_per_week.csv
-
-# Выполняем SQL команды
+# Выполняем SQL команды, используя psql
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
     -- Создаем таблицу для логов
     CREATE TABLE user_logs (
@@ -32,7 +29,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         Date_vAtt VARCHAR(255)
     );
 
-    -- Копируем данные из CSV файла в созданную таблицу
-    \copy user_logs FROM 'aggrigation_logs_per_week.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+    -- Копируем данные из локального CSV файла (внутри контейнера) в созданную таблицу
+    \copy user_logs FROM '/datasets/aggrigation_logs_per_week.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 
 EOSQL
+
+
+
+
+
